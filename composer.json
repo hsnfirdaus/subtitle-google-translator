@@ -1,0 +1,13 @@
+{
+    "name": "hsnfirdaus/subtitle-google-translator",
+    "description": "Php subtitle translator using Google Translate",
+    "type": "library",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "hsnfirdaus",
+            "email": "hasanteam008@gmail.com"
+        }
+    ],
+    "require": {}
+}
