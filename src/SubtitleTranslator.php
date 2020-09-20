@@ -23,12 +23,19 @@ class SubtitleTranslator
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+		if (isset($_SERVER['REMOTE_ADDR'])) {
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Forwarded-For: '.$_SERVER['REMOTE_ADDR']));
+		}
 		curl_setopt($ch, CURLOPT_USERAGENT, 'AndroidTranslate/5.3.0.RC02.130475354-53000263 5.1 phone TRANSLATE_OPM5_TEST_1');
 		$response = curl_exec($ch);
 		curl_close($ch);
 		$json_decoded = json_decode($response);
 		if ($json_decoded->sentences) {
-			return $json_decoded->sentences;
+			$return='';
+			foreach ($json_decoded->sentences as $sentence) {
+				$return.=$sentence->trans;
+			}
+			return $return;
 		}else{
 			$this->doTranslate($text,$source_lang,$target_lang);
 		}
@@ -66,8 +73,8 @@ class SubtitleTranslator
 		$translated=[];
 		foreach ($chunked as $text) {
 			$doTranslate=$this->doTranslate(trim($text),$source_lang,$target_lang);
-			foreach ($doTranslate as $sentence) {
-				$translated[]=$sentence->trans;
+			foreach (explode("\n", $doTranslate) as $sentence) {
+				$translated[]=$sentence;
 			}
 		}
 		$result=[];
@@ -84,44 +91,28 @@ class SubtitleTranslator
 	{
 		$raw='';
 		foreach ($parsed_subtitle as $subtitle) {
-			$text=preg_replace('#\s*<\s*br\s*/\s*>\s*#s', "\r\n", $subtitle['text']);
-			$text=preg_replace_callback('#&\s*(amp|lt|gt)\s*;#', function($m){
+			$text=preg_replace('#\s*<\s*br\s*/\s*>\s*#s', "\n", trim($subtitle['text'],' \n\t\r'));
+			$text=preg_replace_callback('#&\s*(amp|lt|gt|quot)\s*;#', function($m){
 				return html_entity_decode('&'.$m[1].';');
 			}, $text);
 			$text=preg_replace('/\s*=\s*"\s*(#)?\s*/s', '="$1', $text);
-			$raw.=$subtitle['index']."\r\n".$subtitle['timeline']."\r\n".$text."\r\n\r\n";
+			$raw.=$subtitle['index']."\n".$subtitle['timeline']."\n".$text."\n\n";
 		}
 		return $raw;
 	}
-	public function fromRaw($raw,$input_format='srt',$output_format='srt')
+	public function fromRaw($raw)
 	{
-		switch ($input_format) {
-			case 'srt':
-				$parse=$this->parseSrt($raw);
-				break;
-			
-			default:
-				return 'Unsupported input format!';
-				break;
-		}
+		$parse=$this->parseSrt($raw);
 		$translated=$this->chunkedTranslate($parse);
-		switch ($output_format) {
-			case 'srt':
-				$output_raw=$this->formatSrt($translated);
-				break;
-			
-			default:
-				return 'Unsupported output format!';
-				break;
-		}
+		$output_raw=$this->formatSrt($translated);
 		return $output_raw;
 	}
-	public function fromFile($filepath,$output_format='srt')
+	public function fromFile($filepath)
 	{
 		$raw=file_get_contents($filepath);
 		$explode=explode('.', $filepath);
 		$ext=end($explode);
-		$output_raw=$this->fromRaw($raw,$ext,$output_format);
+		$output_raw=$this->fromRaw($raw);
 		return $output_raw;
 	}
 }
