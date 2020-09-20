@@ -91,7 +91,7 @@ class SubtitleTranslator
 	{
 		$raw='';
 		foreach ($parsed_subtitle as $subtitle) {
-			$text=preg_replace('#\s*<\s*br\s*/\s*>\s*#s', "\n", trim($subtitle['text'],' \n\t\r'));
+			$text=preg_replace('#\s*<\s*br\s*/\s*>\s*#s', "\n", trim($subtitle['text']," \r\n"));
 			$text=preg_replace_callback('#&\s*(amp|lt|gt|quot)\s*;#', function($m){
 				return html_entity_decode('&'.$m[1].';');
 			}, $text);
