@@ -23,6 +23,8 @@ class SubtitleTranslator
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+		curl_setopt($ch, CURLOPT_COOKIEJAR, __DIR__.'/cookie.txt');
+		curl_setopt($ch, CURLOPT_COOKIEFILE, __DIR__.'/cookie.txt');
 		if (isset($_SERVER['REMOTE_ADDR'])) {
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Forwarded-For: '.$_SERVER['REMOTE_ADDR']));
 		}
@@ -30,13 +32,15 @@ class SubtitleTranslator
 		$response = curl_exec($ch);
 		curl_close($ch);
 		$json_decoded = json_decode($response);
-		if ($json_decoded->sentences) {
+		if (isset($json_decoded->sentences)) {
 			$return='';
 			foreach ($json_decoded->sentences as $sentence) {
 				$return.=$sentence->trans;
 			}
 			return $return;
 		}else{
+			print_r($response);
+			die();
 			$this->doTranslate($text,$source_lang,$target_lang);
 		}
 	}
@@ -95,6 +99,7 @@ class SubtitleTranslator
 			$text=preg_replace_callback('#&\s*(amp|lt|gt|quot)\s*;#', function($m){
 				return html_entity_decode('&'.$m[1].';');
 			}, $text);
+			$text=preg_replace('#i > (.*?) <#', '<i>$1</i>', $text);
 			$text=preg_replace('/\s*=\s*"\s*(#)?\s*/s', '="$1', $text);
 			$raw.=$subtitle['index']."\n".$subtitle['timeline']."\n".$text."\n\n";
 		}
@@ -102,6 +107,7 @@ class SubtitleTranslator
 	}
 	public function fromRaw($raw)
 	{
+		$raw = iconv(mb_detect_encoding($raw, mb_detect_order(), true), "UTF-8", $raw);
 		$parse=$this->parseSrt($raw);
 		$translated=$this->chunkedTranslate($parse);
 		$output_raw=$this->formatSrt($translated);
