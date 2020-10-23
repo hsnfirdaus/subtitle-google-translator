@@ -12,8 +12,13 @@ You can just manually download this repository as zip and extract to your projec
 You can call this sdk class like this :
 ```php
 require __DIR__ . '/vendor/autoload.php';
-$translator = new Hsnfirdaus\SubtitleTranslator();
+$translator = new Hsnfirdaus\SubtitleTranslator($source_lang,$target_lang);
 ```
+### Parameters on Calling
+| Parameter       	| Type     | Default Value	| Details                     				 |
+| ----------------	| -------- | -------------	| ------------------------------------------ |
+| `$source_lang`	| `string` | auto 			| The source language code (en,id,da, e.t.c) |
+| `$target_lang`	| `string` | id				| The target language code (en,id,da, e.t.c) |
 ### Response
 The response of method on this class is raw srt.
 ### Note

@@ -5,13 +5,17 @@ namespace Hsnfirdaus;
  */
 class SubtitleTranslator
 {
-	
-	private function doTranslate($text,$source_lang,$target_lang)
+	function __construct($source_lang='auto',$target_lang='id')
+	{
+		$this->source_lang=$source_lang;
+		$this->target_lang=$target_lang;
+	}
+	private function doTranslate($text)
 	{
 		$url = "https://translate.google.com/translate_a/single?client=at&dt=t&dt=ld&dt=qca&dt=rm&dt=bd&dj=1&hl=id-ID&ie=UTF-8&oe=UTF-8&inputm=2&otf=2&iid=1dd3b944-fa62-4b55-b330-74909a99969e";
 		$post_data = array(
-			'sl'=>$source_lang,
-			'tl'=>$target_lang,
+			'sl'=>$this->source_lang,
+			'tl'=>$this->target_lang,
 			'q'=>$text
 		);
 		$ch = curl_init();
@@ -41,7 +45,7 @@ class SubtitleTranslator
 		}else{
 			print_r($response);
 			die();
-			$this->doTranslate($text,$source_lang,$target_lang);
+			$this->doTranslate($text);
 		}
 	}
 	private function parseSrt($raw)
@@ -61,7 +65,7 @@ class SubtitleTranslator
 		}
 		return $result;
 	}
-	private function chunkedTranslate($parsed_subtitle,$source_lang='en',$target_lang='id')
+	private function chunkedTranslate($parsed_subtitle)
 	{
 		$length=0;
 		$index=0;
@@ -76,7 +80,7 @@ class SubtitleTranslator
 		}
 		$translated=[];
 		foreach ($chunked as $text) {
-			$doTranslate=$this->doTranslate(trim($text),$source_lang,$target_lang);
+			$doTranslate=$this->doTranslate(trim($text));
 			foreach (explode("\n", $doTranslate) as $sentence) {
 				$translated[]=$sentence;
 			}
