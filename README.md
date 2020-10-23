@@ -31,7 +31,7 @@ Input subtitle type must be srt and output type will be srt to.
 
 ## From Raw
 ```php
-$translator = new Hsnfirdaus\SubtitleTranslator();
+$translator = new Hsnfirdaus\SubtitleTranslator($source_lang,$target_lang);
 $translated = $translator->fromRaw($raw_subtitle);
 echo $translated;
 ```
@@ -41,7 +41,7 @@ echo $translated;
 | `$raw_subtitle`  | `string` | null          | The raw text from subtitle. |
 ## From File
 ```php
-$translator = new Hsnfirdaus\SubtitleTranslator();
+$translator = new Hsnfirdaus\SubtitleTranslator($source_lang,$target_lang);
 $translated = $translator->fromFile($file_path);
 echo $translated;
 ```
