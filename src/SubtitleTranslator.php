@@ -111,7 +111,7 @@ class SubtitleTranslator
 	}
 	public function fromRaw($raw)
 	{
-		$raw = iconv(mb_detect_encoding($raw, mb_detect_order(), true), "UTF-8//IGNORE", $raw);
+		$raw = iconv(mb_detect_encoding($raw, mb_detect_order(), true), "UTF-8//TRANSLIT//IGNORE", $raw);
 		$parse=$this->parseSrt($raw);
 		$translated=$this->chunkedTranslate($parse);
 		$output_raw=$this->formatSrt($translated);
