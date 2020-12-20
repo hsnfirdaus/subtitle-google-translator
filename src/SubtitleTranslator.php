@@ -41,10 +41,14 @@ class SubtitleTranslator
 			foreach ($json_decoded->sentences as $sentence) {
 				$return.=$sentence->trans;
 			}
-			return $return;
+			if (!empty(trim($return))) {
+				return $return;
+			}else{
+				print_r($response.PHP_EOL);
+				$this->doTranslate($text);
+			}
 		}else{
-			print_r($response);
-			die();
+			print_r($response.PHP_EOL);
 			$this->doTranslate($text);
 		}
 	}
@@ -52,7 +56,7 @@ class SubtitleTranslator
 	{
 		preg_match_all('#([0-9]+)(\r\n|\r|\n)([0-9: \-,>]*?)(\r\n|\r|\n)(.*?)(\r\n\r\n|\r\r|\n\n)#s', $raw, $match);
 		$result=[];
-		for ($i=0; $i < count($match[1]); $i++) { 
+		for ($i=0; $i < count($match[1]); $i++) {
 			$text=preg_replace('#(\r\n|\r|\n)#s', '<br/>', $match[5][$i]);
 			if (!empty($text)) {
 				$array=[
@@ -86,7 +90,7 @@ class SubtitleTranslator
 			}
 		}
 		$result=[];
-		for ($i=0; $i < count($parsed_subtitle); $i++) { 
+		for ($i=0; $i < count($parsed_subtitle); $i++) {
 			$result[]=[
 				'index'=>$parsed_subtitle[$i]['index'],
 				'timeline'=>$parsed_subtitle[$i]['timeline'],
@@ -105,6 +109,8 @@ class SubtitleTranslator
 			}, $text);
 			$text=preg_replace('#i > (.*?) <#', '<i>$1</i>', $text);
 			$text=preg_replace('/\s*=\s*"\s*(#)?\s*/s', '="$1', $text);
+			$text=preg_replace('#<font color = \# (.*?)> (.*?) </font>#', '<font color="#$1">$2</font>', $text);
+			$text=preg_replace('#<i> (.*?) </i>#s', '<i>$1</i>', $text);
 			$raw.=$subtitle['index']."\n".$subtitle['timeline']."\n".$text."\n\n";
 		}
 		return $raw;
@@ -126,3 +132,4 @@ class SubtitleTranslator
 		return $output_raw;
 	}
 }
+?>
